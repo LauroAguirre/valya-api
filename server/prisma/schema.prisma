@@ -1,0 +1,354 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== ENUMS ====================
+
+enum UserRole {
+  CLIENT
+  ADMIN
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+  FACEBOOK
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  CONFIRMED
+  OVERDUE
+  REFUNDED
+  FAILED
+}
+
+enum LeadStage {
+  QUALIFICACAO
+  CADENCIA
+  VISITA
+  PROPOSTA
+  CONTRATO
+  GANHO
+  PERDA
+}
+
+enum LeadOrigin {
+  FACEBOOK
+  INSTAGRAM
+  TIKTOK
+  GOOGLE
+  WHATSAPP
+  OUTRO
+}
+
+enum BbqType {
+  NENHUMA
+  CARVAO
+  ELETRICA
+}
+
+enum GarageType {
+  COBERTA
+  DESCOBERTA
+}
+
+enum PropertyMode {
+  UNICA
+  MULTIPLA
+}
+
+enum MessageSender {
+  LEAD
+  AI
+  BROKER
+}
+
+enum IntentCategory {
+  SAUDACAO
+  INTERESSE_GENERICO
+  INTERESSE_COM_FILTROS
+  PEDIDO_DE_OPCOES
+  ANALISANDO_IMOVEL_ESPECIFICO
+  COMPARANDO_IMOVEIS
+  PEDIDO_DE_DETALHES
+  PEDIDO_DE_FOTOS
+  PEDIDO_DE_AGENDAMENTO
+  DUVIDA_FINANCEIRA
+  NEGOCIACAO
+  OUTROS
+}
+
+// ==================== MODELS ====================
+
+model User {
+  id            String       @id @default(uuid())
+  name          String
+  email         String       @unique
+  password      String?
+  role          UserRole     @default(CLIENT)
+  provider      AuthProvider @default(LOCAL)
+  providerId    String?
+  phone         String?
+  personalPhone String?
+  address       String?
+  avatarUrl     String?
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  // Relacoes CLIENT
+  subscription    Subscription?
+  properties      Property[]
+  leads           Lead[]
+  aiConfig        AiConfig?
+  evolutionConfig EvolutionConfig?
+  asaasCustomer   AsaasCustomer?
+
+  // Relacoes ADMIN
+  passwordResets PasswordReset[]
+
+  @@map("users")
+}
+
+model PasswordReset {
+  id        String   @id @default(uuid())
+  userId    String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_resets")
+}
+
+model Subscription {
+  id            String             @id @default(uuid())
+  userId        String             @unique
+  status        SubscriptionStatus @default(TRIAL)
+  startDate     DateTime           @default(now())
+  expiresAt     DateTime
+  asaasSubId    String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments Payment[]
+
+  @@map("subscriptions")
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  subscriptionId String
+  asaasPaymentId String?
+  amount         Float
+  status         PaymentStatus @default(PENDING)
+  paidAt         DateTime?
+  dueDate        DateTime
+  createdAt      DateTime      @default(now())
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model AsaasCustomer {
+  id              String  @id @default(uuid())
+  userId          String  @unique
+  asaasCustomerId String  @unique
+  cpfCnpj         String
+  name            String
+  email           String
+  phone           String?
+  postalCode      String?
+  address         String?
+  addressNumber   String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("asaas_customers")
+}
+
+model AiConfig {
+  id             String  @id @default(uuid())
+  userId         String  @unique
+  customPrompt   String? @db.LongText
+  isActive       Boolean @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("ai_configs")
+}
+
+model EvolutionConfig {
+  id           String  @id @default(uuid())
+  userId       String  @unique
+  instanceName String  @unique
+  instanceId   String?
+  qrCode       String? @db.LongText
+  connected    Boolean @default(false)
+  phone        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("evolution_configs")
+}
+
+model Property {
+  id          String       @id @default(uuid())
+  userId      String
+  name        String
+  address     String?
+  bedrooms    Int?
+  garageCount Int?
+  garageType  GarageType?
+  bathrooms   Int?
+  bbqType     BbqType      @default(NENHUMA)
+  description String?      @db.LongText
+  privateArea Float?
+  mode        PropertyMode @default(UNICA)
+  purpose     String?      @default("venda")
+  type        String?
+  neighborhood String?
+  city        String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Financeiro unidade unica
+  totalPrice    Float?
+  minDown       Float?
+  installments  Int?
+  annualBoost   Float?
+  installmentValue Float?
+  paymentConditions String? @db.Text
+  paymentOptions    String? @db.Text
+
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  units      PropertyUnit[]
+  images     PropertyImage[]
+  adLinks    PropertyAdLink[]
+  leadProperties LeadProperty[]
+
+  @@map("properties")
+}
+
+model PropertyUnit {
+  id              String @id @default(uuid())
+  propertyId      String
+  unitName        String
+  bedrooms        Int?
+  garage          Int?
+  privateArea     Float?
+  garageArea      Float?
+  totalArea       Float?
+  downPayment     Float?
+  annualBoost     Float?
+  installmentValue Float?
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("property_units")
+}
+
+model PropertyImage {
+  id          String  @id @default(uuid())
+  propertyId  String
+  url         String
+  description String?
+  order       Int     @default(0)
+  createdAt   DateTime @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("property_images")
+}
+
+model PropertyAdLink {
+  id         String @id @default(uuid())
+  propertyId String
+  platform   String // facebook, instagram, tiktok
+  adId       String?
+  url        String?
+  createdAt  DateTime @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("property_ad_links")
+}
+
+model Lead {
+  id          String     @id @default(uuid())
+  userId      String
+  name        String
+  phone       String
+  email       String?
+  origin      LeadOrigin @default(WHATSAPP)
+  stage       LeadStage  @default(QUALIFICACAO)
+  aiEnabled   Boolean    @default(true)
+  lastReplyAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages       Message[]
+  leadProperties LeadProperty[]
+
+  @@unique([userId, phone])
+  @@map("leads")
+}
+
+model LeadProperty {
+  id         String @id @default(uuid())
+  leadId     String
+  propertyId String
+  interest   String? @db.Text
+  createdAt  DateTime @default(now())
+
+  lead     Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([leadId, propertyId])
+  @@map("lead_properties")
+}
+
+model Message {
+  id        String        @id @default(uuid())
+  leadId    String
+  sender    MessageSender
+  content   String        @db.LongText
+  mediaUrl  String?
+  intent    IntentCategory?
+  createdAt DateTime      @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId, createdAt])
+  @@map("messages")
+}
+
+model SystemConfig {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String @db.LongText
+
+  @@map("system_configs")
+}

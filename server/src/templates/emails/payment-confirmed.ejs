@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagamento confirmado</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          <!-- Header -->
+          <tr>
+            <td style="background-color:#16a34a;padding:30px;text-align:center;">
+              <h1 style="color:#ffffff;margin:0;font-size:24px;">Valya</h1>
+            </td>
+          </tr>
+          <!-- Content -->
+          <tr>
+            <td style="padding:40px 30px;">
+              <h2 style="color:#1a1a2e;margin:0 0 16px;font-size:20px;">Pagamento confirmado!</h2>
+              <p style="color:#52525b;font-size:16px;line-height:1.6;margin:0 0 20px;">
+                Ola, <%= name %>. Seu pagamento foi processado com sucesso.
+              </p>
+              <div style="background-color:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:20px;margin:0 0 24px;">
+                <table width="100%" cellpadding="4" cellspacing="0">
+                  <tr>
+                    <td style="color:#71717a;font-size:14px;">Valor pago:</td>
+                    <td style="color:#1a1a2e;font-size:16px;font-weight:bold;text-align:right;"><%= amount %></td>
+                  </tr>
+                  <tr>
+                    <td style="color:#71717a;font-size:14px;">Proxima renovacao:</td>
+                    <td style="color:#1a1a2e;font-size:16px;font-weight:bold;text-align:right;"><%= nextDueDate %></td>
+                  </tr>
+                </table>
+              </div>
+              <p style="color:#71717a;font-size:14px;line-height:1.5;margin:0;">
+                Obrigado por continuar usando a Valya!
+              </p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#f4f4f5;padding:20px 30px;text-align:center;">
+              <p style="color:#a1a1aa;font-size:12px;margin:0;">
+                &copy; <%= year %> Valya. Todos os direitos reservados.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
