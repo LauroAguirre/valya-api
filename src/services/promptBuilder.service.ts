@@ -1,6 +1,10 @@
 import prisma from '../config/database.js';
 import { openaiService } from './openai.service.js';
-import type { IntentCategory } from '@prisma/client';
+
+type IntentCategory =
+  | 'SAUDACAO' | 'INTERESSE_GENERICO' | 'INTERESSE_COM_FILTROS' | 'PEDIDO_DE_OPCOES'
+  | 'ANALISANDO_IMOVEL_ESPECIFICO' | 'COMPARANDO_IMOVEIS' | 'PEDIDO_DE_DETALHES'
+  | 'PEDIDO_DE_FOTOS' | 'PEDIDO_DE_AGENDAMENTO' | 'DUVIDA_FINANCEIRA' | 'NEGOCIACAO' | 'OUTROS';
 
 const API_SYSTEM_PROMPT = `Voce e um assistente virtual de um corretor de imoveis. Sua funcao e atender clientes via WhatsApp de forma natural, profissional e consultiva.
 

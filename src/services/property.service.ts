@@ -1,5 +1,8 @@
 import prisma from '../config/database.js';
-import type { BbqType, GarageType, PropertyMode } from '@prisma/client';
+
+type GarageType = 'COBERTA' | 'DESCOBERTA' | 'SUBSOLO' | 'NENHUMA';
+type BbqType = 'PRIVATIVA' | 'COLETIVA' | 'NENHUMA';
+type PropertyMode = 'PRONTO' | 'EM_CONSTRUCAO' | 'NA_PLANTA';
 
 interface CreatePropertyData {
   name: string;

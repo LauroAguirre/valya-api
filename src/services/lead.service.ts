@@ -1,5 +1,6 @@
 import prisma from '../config/database.js';
-import type { LeadStage } from '@prisma/client';
+
+type LeadStage = 'QUALIFICACAO' | 'CADENCIA' | 'VISITA' | 'PROPOSTA' | 'CONTRATO' | 'GANHO' | 'PERDA';
 
 export const leadService = {
   async listByStage(userId: string) {
