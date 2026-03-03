@@ -46,16 +46,12 @@ export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/**
- * Calcula tempo de digitacao simulada para EvolutionAPI.
- * Para cada caractere, soma entre 100 e 200ms.
- */
 export function calculateTypingDelay(message: string): number {
   const charCount = message.length;
   const minMs = 100;
   const maxMs = 200;
   const avgMs = (minMs + maxMs) / 2;
-  return Math.min(charCount * avgMs, 15000); // max 15s
+  return Math.min(charCount * avgMs, 15000);
 }
 
 export function normalizePhone(phone: string): string {
