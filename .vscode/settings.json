@@ -1,0 +1,18 @@
+{
+  // 1. Define o Prettier como o formatador padrão do projeto
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // 2. Obriga o editor a formatar o arquivo inteiro ao salvar
+  "editor.formatOnSave": true,
+
+  // 3. Diz para o ESLint aplicar as correções automáticas (autofix) ao salvar
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  // 4. Garante que o ESLint valide arquivos TypeScript explicitamente
+  "eslint.validate": [
+    "javascript",
+    "typescript"
+  ]
+}

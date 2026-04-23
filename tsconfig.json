@@ -13,8 +13,12 @@
     "forceConsistentCasingInFileNames": true,
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "typeRoots": [                                       /* Specify multiple folders that act like `./node_modules/@types`. */
+      "./node_modules/@types",
+      "./src/@types"
+    ]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "@types"],
   "exclude": ["node_modules", "dist"]
 }

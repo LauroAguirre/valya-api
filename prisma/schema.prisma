@@ -36,13 +36,13 @@ enum PaymentStatus {
 }
 
 enum LeadStage {
-  QUALIFICACAO
-  CADENCIA
-  VISITA
-  PROPOSTA
-  CONTRATO
-  GANHO
-  PERDA
+  QUALIFICATION // @map("QUALIFICACAO")
+  CADENCE // @map("CADENCIA")
+  VISITATION // @map("VISITA")
+  PROPOSAL // @map("PROPOSTA")
+  CONTRACT // @map("CONTRATO")
+  WIN // @map("GANHO")
+  LOSS // @map("PERDA")
 }
 
 enum LeadOrigin {
@@ -51,23 +51,25 @@ enum LeadOrigin {
   TIKTOK
   GOOGLE
   WHATSAPP
-  OUTRO
+  OTHER // @map("OUTRO")
 }
 
 enum BbqType {
-  NENHUMA
-  CARVAO
-  ELETRICA
+  NONE // @map("NENHUMA")
+  COAL // @map("CARVAO")
+  ELETRIC // @map("ELETRICA")
 }
 
 enum GarageType {
-  COBERTA
-  DESCOBERTA
+  NONE // @map("NENHUMA")
+  COVERED // @map("COBERTA")
+  UNCOVERED // @map("DESCOBERTA")
+  MIXED // @map("MISTA")
 }
 
 enum PropertyMode {
-  UNICA
-  MULTIPLA
+  SINGLE //     @map("UNICA")
+  MULTIPLE // @map("MULTIPLA")
 }
 
 enum MessageSender {
@@ -77,267 +79,149 @@ enum MessageSender {
 }
 
 enum IntentCategory {
-  SAUDACAO
-  INTERESSE_GENERICO
-  INTERESSE_COM_FILTROS
-  PEDIDO_DE_OPCOES
-  ANALISANDO_IMOVEL_ESPECIFICO
-  COMPARANDO_IMOVEIS
-  PEDIDO_DE_DETALHES
-  PEDIDO_DE_FOTOS
-  PEDIDO_DE_AGENDAMENTO
-  DUVIDA_FINANCEIRA
-  NEGOCIACAO
-  OUTROS
+  GREETING // @map("SAUDACAO")
+  GENERIC_INTEREST // @map("INTERESSE_GENERICO")
+  INTEREST_WITH_FILTERS // @map("INTERESSE_COM_FILTROS")
+  REQUEST_FOR_OPTIONS // @map("PEDIDO_DE_OPCOES")
+  ANALYZING_SPECIFIC_PROPERTY // @map("ANALISANDO_IMOVEL_ESPECIFICO")
+  COMPARING_PROPERTIES // @map("COMPARANDO_IMOVEIS")
+  REQUEST_FOR_DETAILS // @map("PEDIDO_DE_DETALHES")
+  REQUEST_FOR_PHOTOS // @map("PEDIDO_DE_FOTOS")
+  REQUEST_FOR_SCHEDULING // @map("PEDIDO_DE_AGENDAMENTO")
+  FINANCIAL_QUESTION // @map("DUVIDA_FINANCEIRA")
+  NEGOTIATION // @map("NEGOCIACAO")
+  OTHER // @map("OUTROS")
 }
 
 // ==================== MODELS ====================
 
-model User {
-  id            String       @id @default(uuid())
-  name          String
-  email         String       @unique
-  password      String?
-  role          UserRole     @default(CLIENT)
-  provider      AuthProvider @default(LOCAL)
-  providerId    String?
-  phone         String?
-  personalPhone String?
-  address       String?
-  avatarUrl     String?
-  isActive      Boolean      @default(true)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-
-  // Relacoes CLIENT
-  subscription    Subscription?
-  properties      Property[]
-  leads           Lead[]
-  aiConfig        AiConfig?
-  evolutionConfig EvolutionConfig?
-  asaasCustomer   AsaasCustomer?
-
-  // Relacoes ADMIN
-  passwordResets PasswordReset[]
-
-  @@map("users")
-}
-
-model PasswordReset {
-  id        String   @id @default(uuid())
-  userId    String
-  code      String
-  expiresAt DateTime
-  used      Boolean  @default(false)
-  createdAt DateTime @default(now())
+model AiConfig {
+  id           String   @id @default(uuid()) @map("id_config_ia")
+  userId       String   @unique @map("id_usuario")
+  customPrompt String?  @map("prompt_personalizado") @db.LongText
+  isActive     Boolean  @default(true) @map("ativo")
+  createdAt    DateTime @default(now()) @map("dt_criacao")
+  updatedAt    DateTime @updatedAt @map("dt_atualizacao")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("password_resets")
-}
-
-model Subscription {
-  id            String             @id @default(uuid())
-  userId        String             @unique
-  status        SubscriptionStatus @default(TRIAL)
-  startDate     DateTime           @default(now())
-  expiresAt     DateTime
-  asaasSubId    String?
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
-
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  payments Payment[]
-
-  @@map("subscriptions")
-}
-
-model Payment {
-  id             String        @id @default(uuid())
-  subscriptionId String
-  asaasPaymentId String?
-  amount         Float
-  status         PaymentStatus @default(PENDING)
-  paidAt         DateTime?
-  dueDate        DateTime
-  createdAt      DateTime      @default(now())
-
-  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-
-  @@map("payments")
+  @@map("clientes_config_ia")
 }
 
 model AsaasCustomer {
-  id              String  @id @default(uuid())
-  userId          String  @unique
-  asaasCustomerId String  @unique
-  cpfCnpj         String
-  name            String
-  email           String
-  phone           String?
-  postalCode      String?
-  address         String?
-  addressNumber   String?
+  id              String  @id @default(uuid()) @map("id_usuario_asaas")
+  userId          String  @unique @map("id_usuario")
+  asaasCustomerId String  @unique @map("id_externo_cliente")
+  cpfCnpj         String  @map("cpf_cnpj")
+  name            String  @map("nome")
+  email           String  @map("email")
+  phone           String? @map("telefone")
+  postalCode      String? @map("cep")
+  street          String? @map("logradouro")
+  address         String? @map("endereco")
+  addressNumber   String? @map("numero")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("asaas_customers")
+  @@map("asaas_clientes")
 }
 
-model AiConfig {
-  id             String  @id @default(uuid())
-  userId         String  @unique
-  customPrompt   String? @db.LongText
-  isActive       Boolean @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+model ConstructionCompany {
+  id           String                     @id @default(uuid()) @map("id_empresa_construcao")
+  name         String                     @map("nome")
+  cnpj         String                     @unique @map("cnpj")
+  phone        String                     @map("telefone")
+  email        String                     @map("email")
+  addres       String?                    @map("endereco")
+  createdAt    DateTime                   @default(now()) @map("dt_criacao")
+  updatedAt    DateTime                   @updatedAt @map("dt_atualizacao")
+  users        ConstructionCompanyUsers[]
+  subscription Subscription[]
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("empresas_construcao")
+}
 
-  @@map("ai_configs")
+model ConstructionCompanyUsers {
+  companyId String  @map("id_empresa_construcao")
+  userId    String  @map("id_usuario")
+  active    Boolean @default(true) @map("ativo")
+
+  constructionCompany ConstructionCompany @relation(fields: [companyId], references: [id], onDelete: NoAction)
+  user                User                @relation(fields: [userId], references: [id], onDelete: NoAction)
+
+  @@id([companyId, userId])
+  @@map("empresas_construcao_usuarios")
 }
 
 model EvolutionConfig {
-  id           String  @id @default(uuid())
-  userId       String  @unique
-  instanceName String  @unique
-  instanceId   String?
-  qrCode       String? @db.LongText
-  connected    Boolean @default(false)
-  phone        String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id           String   @id @default(uuid()) @map("id_config_evolution")
+  userId       String   @unique @map("id_usuario")
+  instanceName String   @unique @map("nome_instancia")
+  instanceId   String?  @map("id_instancia")
+  qrCode       String?  @map("qr_code") @db.LongText
+  connected    Boolean  @default(false) @map("conectado")
+  phone        String?  @map("telefone")
+  createdAt    DateTime @default(now()) @map("dt_criacao")
+  updatedAt    DateTime @updatedAt @map("dt_atualizacao")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("evolution_configs")
+  @@map("config_evolution")
 }
 
-model Property {
-  id          String       @id @default(uuid())
-  userId      String
-  name        String
-  address     String?
-  bedrooms    Int?
-  garageCount Int?
-  garageType  GarageType?
-  bathrooms   Int?
-  bbqType     BbqType      @default(NENHUMA)
-  description String?      @db.LongText
-  privateArea Float?
-  mode        PropertyMode @default(UNICA)
-  purpose     String?      @default("venda")
-  type        String?
-  neighborhood String?
-  city        String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+model Features {
+  featureId         Int                  @id @default(autoincrement()) @map("id_feature")
+  name              String               @map("nome_feature")
+  sysAdmin          Boolean              @default(false) @map("administrador_sistema")
+  sysModuleFeatures SysModulesFeatures[]
+  PlanFeature       PlanFeature[]
 
-  // Financeiro unidade unica
-  totalPrice    Float?
-  minDown       Float?
-  installments  Int?
-  annualBoost   Float?
-  installmentValue Float?
-  paymentConditions String? @db.Text
-  paymentOptions    String? @db.Text
-
-  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  units      PropertyUnit[]
-  images     PropertyImage[]
-  adLinks    PropertyAdLink[]
-  leadProperties LeadProperty[]
-
-  @@map("properties")
-}
-
-model PropertyUnit {
-  id              String @id @default(uuid())
-  propertyId      String
-  unitName        String
-  bedrooms        Int?
-  garage          Int?
-  privateArea     Float?
-  garageArea      Float?
-  totalArea       Float?
-  downPayment     Float?
-  annualBoost     Float?
-  installmentValue Float?
-
-  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-
-  @@map("property_units")
-}
-
-model PropertyImage {
-  id          String  @id @default(uuid())
-  propertyId  String
-  url         String
-  description String?
-  order       Int     @default(0)
-  createdAt   DateTime @default(now())
-
-  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-
-  @@map("property_images")
-}
-
-model PropertyAdLink {
-  id         String @id @default(uuid())
-  propertyId String
-  platform   String // facebook, instagram, tiktok
-  adId       String?
-  url        String?
-  createdAt  DateTime @default(now())
-
-  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-
-  @@map("property_ad_links")
+  @@map("features")
 }
 
 model Lead {
-  id          String     @id @default(uuid())
-  userId      String
-  name        String
-  phone       String
-  email       String?
-  origin      LeadOrigin @default(WHATSAPP)
-  stage       LeadStage  @default(QUALIFICACAO)
-  aiEnabled   Boolean    @default(true)
-  lastReplyAt DateTime?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id          String     @id @default(uuid()) @map("id_lead")
+  userId      String     @map("id_usuario")
+  name        String     @map("nome")
+  phone       String     @map("telefone")
+  email       String?    @map("email")
+  origin      LeadOrigin @default(WHATSAPP) @map("origem")
+  stage       LeadStage  @default(QUALIFICATION) @map("etapa")
+  aiEnabled   Boolean    @default(true) @map("ia_ativa")
+  lastReplyAt DateTime?  @map("dt_ultima_resposta")
+  createdAt   DateTime   @default(now()) @map("dt_cadastro")
+  updatedAt   DateTime   @updatedAt @map("dt_atualizacao")
 
-  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  messages       Message[]
-  leadProperties LeadProperty[]
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages   Message[]
+  properties LeadProperty[]
 
   @@unique([userId, phone])
   @@map("leads")
 }
 
 model LeadProperty {
-  id         String @id @default(uuid())
-  leadId     String
-  propertyId String
-  interest   String? @db.Text
-  createdAt  DateTime @default(now())
+  id         String   @id @default(uuid()) @map("id_lead_imovel")
+  leadId     String   @map("id_lead")
+  propertyId String   @map("id_imovel")
+  interest   String?  @map("interesse") @db.Text
+  createdAt  DateTime @default(now()) @map("dt_cadastro")
 
   lead     Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
   property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   @@unique([leadId, propertyId])
-  @@map("lead_properties")
+  @@map("imovel_leads")
 }
 
 model Message {
-  id        String        @id @default(uuid())
-  leadId    String
-  sender    MessageSender
-  content   String        @db.LongText
-  mediaUrl  String?
-  intent    IntentCategory?
-  createdAt DateTime      @default(now())
+  id        String          @id @default(uuid()) @map("id_mensagem")
+  leadId    String          @map("id_lead")
+  sender    MessageSender   @map("remetente")
+  content   String          @map("conteudo") @db.LongText
+  mediaUrl  String?         @map("url_midia")
+  intent    IntentCategory? @map("intent")
+  createdAt DateTime        @default(now())
 
   lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
@@ -345,10 +229,241 @@ model Message {
   @@map("messages")
 }
 
-model SystemConfig {
-  id    String @id @default(uuid())
-  key   String @unique
-  value String @db.LongText
+model PasswordReset {
+  id        String   @id @default(uuid()) @map("id_reset_senha")
+  userId    String   @map("id_usuario")
+  code      String   @map("codigo")
+  expiresAt DateTime @map("dt_expiracao")
+  used      Boolean  @default(false) @map("utilizada")
+  createdAt DateTime @default(now()) @map("dt_criacao")
 
-  @@map("system_configs")
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("recuperacao_senhas")
+}
+
+model Payment {
+  id             String        @id @default(uuid()) @map("id_pagamento")
+  subscriptionId String        @map("id_assinatura")
+  asaasPaymentId String?       @map("id_pagamento_asaas")
+  amount         Decimal       @map("valor") @db.Decimal(10, 2)
+  status         PaymentStatus @default(PENDING) @map("status")
+  paidAt         DateTime?     @map("dt_pagamento")
+  dueDate        DateTime      @map("dt_vencimento")
+  createdAt      DateTime      @default(now()) @map("dt_criacao")
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@map("pagamentos")
+}
+
+model Plan {
+  id    String  @id @default(uuid()) @map("id_plano")
+  name  String  @map("nome")
+  value Decimal @map("valor") @db.Decimal(7, 2)
+
+  features      PlanFeature[]
+  subscriptions Subscription[]
+
+  @@map("planos")
+}
+
+model PlanFeature {
+  planId    String @map("id_plano")
+  featureId Int    @map("id_feature")
+
+  plan    Plan     @relation(fields: [planId], references: [id], onDelete: NoAction)
+  feature Features @relation(fields: [featureId], references: [featureId], onDelete: NoAction)
+
+  @@id([planId, featureId])
+  @@map("planos_features")
+}
+
+model Property {
+  id           String       @id @default(uuid()) @map("id_imovel")
+  userId       String       @map("id_usuario")
+  name         String       @map("nome")
+  address      String?      @map("endereco")
+  bedrooms     Int?         @map("quartos")
+  garageCount  Int?         @map("qtd_garagens")
+  garageType   GarageType?  @map("tipo_garagem")
+  bathrooms    Int?         @map("banheiros")
+  bbqType      BbqType      @default(NONE) @map("churrasqueira")
+  description  String?      @map("descricao") @db.LongText
+  privateArea  Decimal?     @map("area_privativa") @db.Decimal(7, 2)
+  mode         PropertyMode @default(SINGLE) @map("modo")
+  purpose      String?      @default("venda") @map("prop_objetivo")
+  type         String?      @map("tipo")
+  neighborhood String?      @map("bairro")
+  city         String?      @map("cidade")
+  createdAt    DateTime     @default(now()) @map("dt_cadastro")
+  updatedAt    DateTime     @updatedAt @map("dt_atualizacao")
+  deletedAt    DateTime?    @map("dt_exclusao")
+
+  // Financeiro unidade unica
+  totalPrice        Decimal? @map("valor_total") @db.Decimal(13, 2)
+  minDown           Decimal? @map("valor_minimo_desc") @db.Decimal(13, 2)
+  installments      Int?     @map("parcelas")
+  annualBoost       Decimal? @map("reforco_anual") @db.Decimal(13, 2)
+  installmentValue  Decimal? @map("valor_parcela") @db.Decimal(13, 2)
+  paymentConditions String?  @map("condicoes_pagamento") @db.Text
+  paymentOptions    String?  @map("opcoes_pagamento") @db.Text
+
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  units          PropertyUnit[]
+  images         PropertyImage[]
+  adLinks        PropertyAdLink[]
+  leadProperties LeadProperty[]
+
+  @@map("imoveis")
+}
+
+model PropertyAdLink {
+  id         String   @id @default(uuid()) @map("id_link_anuncio")
+  propertyId String   @map("id_imovel")
+  platform   String   @map("plataforma") // facebook, instagram, tiktok
+  adId       String?  @map("id_anuncio")
+  url        String?  @map("url")
+  createdAt  DateTime @default(now()) @map("dt_cadastro")
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("imovel_ads_links")
+}
+
+model PropertyImage {
+  id          String   @id @default(uuid()) @map("id_imagem_imovel")
+  propertyId  String   @map("id_imovel")
+  url         String   @map("url")
+  description String?  @map("descricao")
+  order       Int      @default(0) @map("ordenacao")
+  createdAt   DateTime @default(now()) @map("dt_cadastro")
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("imovel_imagens")
+}
+
+model PropertyUnit {
+  id               String    @id @default(uuid()) @map("id_unidade_imovel")
+  propertyId       String    @map("id_imovel")
+  unitName         String    @map("nome_unidade")
+  bedrooms         Int?      @map("quartos")
+  garage           Int?      @map("garagens")
+  privateArea      Decimal?  @map("area_privativa") @db.Decimal(8, 2)
+  garageArea       Decimal?  @map("area_garagens") @db.Decimal(8, 2)
+  totalArea        Decimal?  @map("area_total") @db.Decimal(8, 2)
+  downPayment      Decimal?  @map("valor_entrada") @db.Decimal(13, 2)
+  annualBoost      Decimal?  @map("reforco_anual") @db.Decimal(13, 2)
+  installmentValue Decimal?  @map("valor_parcela") @db.Decimal(13, 2)
+  deletedAt        DateTime? @map("dt_exclusao")
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("imovel_unidades")
+}
+
+model RealStateAgent {
+  id             String  @id @default(uuid()) @map("id_corretor")
+  userId         String  @unique @map("id_usuario")
+  creci          String  @unique @map("creci")
+  comercialPhone String? @map("telefone_comercial")
+  cnpj           String? @unique @map("cnpj")
+  site           String? @map("site")
+
+  user User @relation(fields: [userId], references: [id], onDelete: NoAction)
+
+  subscriptions Subscription[]
+
+  @@unique([userId, creci])
+  @@map("corretores_imovel")
+}
+
+model RefreshKeys {
+  refreshId   String   @id @default(uuid()) @map("id_refresh")
+  userId      String   @map("id_usuario")
+  authExpires DateTime @map("data_expiracao")
+  ip          String   @map("ip_origem")
+  authToken   String   @map("token_atual") @db.Text
+  user        User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("refresh_keys")
+}
+
+model Subscription {
+  id         String             @id @default(uuid()) @map("id_assinatura")
+  agentId    String?            @unique @map("id_corretor")
+  companyId  String?            @map("id_construtora")
+  status     SubscriptionStatus @default(TRIAL) @map("status")
+  startDate  DateTime           @default(now()) @map("dt_inicio")
+  expiresAt  DateTime           @map("dt_expiracao")
+  asaasSubId String?            @map("id_assinatura_asaas")
+  planId     String             @map("id_plano")
+  createdAt  DateTime           @default(now()) @map("dt_criacao")
+  updatedAt  DateTime           @updatedAt @map("dt_atualizacao")
+
+  realStateAgent RealStateAgent?      @relation(fields: [agentId], references: [id], onDelete: NoAction)
+  company        ConstructionCompany? @relation(fields: [companyId], references: [id], onDelete: NoAction)
+  payments       Payment[]
+  plan           Plan                 @relation(fields: [planId], references: [id], onDelete: NoAction)
+
+  @@map("assinaturas")
+}
+
+model SysModules {
+  moduleId Int                  @id @default(autoincrement()) @map("id_modulo")
+  name     String               @map("nome_modulo")
+  price    Decimal              @default(0) @map("preco") @db.Decimal(7, 2)
+  features SysModulesFeatures[]
+
+  @@map("sys_modulos")
+}
+
+model SysModulesFeatures {
+  moduleId  Int        @map("id_modulo")
+  featureId Int        @map("id_feature")
+  module    SysModules @relation(fields: [moduleId], references: [moduleId], onDelete: NoAction, onUpdate: NoAction)
+  feature   Features   @relation(fields: [featureId], references: [featureId], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([moduleId, featureId])
+  @@map("sys_modulos_features")
+}
+
+model SystemConfig {
+  id    String @id @default(uuid()) @map("id_config_sistema")
+  key   String @unique @map("chave")
+  value String @map("valor") @db.LongText
+
+  @@map("configs_sistema")
+}
+
+model User {
+  id         String       @id @default(uuid()) @map("id_usuario")
+  name       String       @map("nome")
+  email      String       @unique
+  password   String?      @map("senha")
+  cpf        String?      @unique @map("cpf")
+  role       UserRole     @default(CLIENT) @map("perfil")
+  provider   AuthProvider @default(LOCAL) @map("provedor")
+  providerId String?      @map("id_provedor")
+  phone      String?      @map("telefone_comercial")
+  address    String?      @map("endereco")
+  avatarUrl  String?      @map("url_img_perfil")
+  isActive   Boolean      @default(true) @map("ativo")
+  createdAt  DateTime     @default(now()) @map("dt_cadastro")
+  updatedAt  DateTime     @updatedAt @map("dt_atualizacao")
+
+  // subscription    Subscription?
+  properties      Property[]
+  leads           Lead[]
+  aiConfig        AiConfig?
+  evolutionConfig EvolutionConfig?
+  asaasCustomer   AsaasCustomer?
+
+  passwordResets PasswordReset[]
+  refreshKeys    RefreshKeys[]
+  realStateAgent RealStateAgent?
+  companyUsers   ConstructionCompanyUsers[]
+
+  @@map("usuarios")
 }

@@ -1,17 +1,21 @@
-import { Router } from 'express';
-import { leadController } from '../controllers/lead.controller.js';
-import { authenticate, authorizeRoles } from '../middlewares/auth.js';
+import { Router } from 'express'
+import { authenticate, authorizeRoles } from '../middlewares/auth.js'
+import { listByStageController } from '@/controllers/leads/listByStageController.js'
+import { getByIdController } from '@/controllers/leads/getByIdController.js'
+import { getMessagesController } from '@/controllers/leads/getMessagesController.js'
+import { saveLeadController } from '@/controllers/leads/saveLeadController.js'
+import { toggleAiController } from '@/controllers/leads/toggleAiController.js'
 
-const router = Router();
+const router = Router()
 
-router.use(authenticate, authorizeRoles('CLIENT'));
+router.use(authenticate, authorizeRoles('CLIENT'))
 
-router.get('/', leadController.listByStage);
-router.get('/:id', leadController.getById);
-router.get('/:id/messages', leadController.getMessages);
-router.post('/', leadController.create);
-router.put('/:id', leadController.update);
-router.patch('/:id/stage', leadController.updateStage);
-router.patch('/:id/toggle-ai', leadController.toggleAi);
+router.get('/', listByStageController)
+router.get('/:id', getByIdController)
+router.get('/:id/messages', getMessagesController)
+router.post('/', saveLeadController)
+// router.put('/:id', leadController.update);
+// router.patch('/:id/stage', leadController.updateStage)
+router.patch('/:id/toggle-ai', toggleAiController)
 
-export default router;
+export default router

@@ -1,10 +1,22 @@
-import { Router } from 'express';
-import { dashboardController } from '../controllers/dashboard.controller.js';
-import { authenticate, authorizeRoles } from '../middlewares/auth.js';
+import { Router } from 'express'
+import { authenticate, authorizeRoles } from '../middlewares/auth.js'
+import { getAdminDashboardController } from '@/controllers/dashboard/getDashboardController.js'
+import { UserRole } from '@prisma/client'
+import { getClientDashboardController } from '@/controllers/dashboard/getClientDashboardController.js'
 
-const router = Router();
+const router = Router()
 
-router.get('/client', authenticate, authorizeRoles('CLIENT'), dashboardController.getClientDashboard);
-router.get('/admin', authenticate, authorizeRoles('ADMIN'), dashboardController.getAdminDashboard);
+router.get(
+  '/client',
+  authenticate,
+  authorizeRoles(UserRole.CLIENT),
+  getClientDashboardController
+)
+router.get(
+  '/admin',
+  authenticate,
+  authorizeRoles(UserRole.ADMIN),
+  getAdminDashboardController
+)
 
-export default router;
+export default router

@@ -1,16 +1,22 @@
-import { Router } from 'express';
-import { backofficeController } from '../controllers/backoffice.controller.js';
-import { authenticate, authorizeRoles } from '../middlewares/auth.js';
+import { Router } from 'express'
+// import { backofficeController } from '../controllers/backoffice.controller.js'
+import { authenticate, authorizeRoles } from '../middlewares/auth.js'
+// import { getDashboardController } from '@/controllers/dashboard/getDashboardController.js'
+import { listClientsController } from '@/controllers/users/listClientsController.js'
+import { getClientDetailController } from '@/controllers/users/getClientDetailController.js'
+import { listAdminUsersController } from '@/controllers/users/listAdminUsersController.js'
+import { getAdminUserController } from '@/controllers/users/getAdminUserController.js'
+import { toggleAdminUserController } from '@/controllers/users/toggleAdminUserController.js'
 
-const router = Router();
+const router = Router()
 
-router.use(authenticate, authorizeRoles('ADMIN'));
+router.use(authenticate, authorizeRoles('ADMIN'))
 
-router.get('/dashboard', backofficeController.getDashboard);
-router.get('/clients', backofficeController.listClients);
-router.get('/clients/:id', backofficeController.getClientDetail);
-router.get('/users', backofficeController.listAdminUsers);
-router.get('/users/:id', backofficeController.getAdminUser);
-router.patch('/users/:id/toggle', backofficeController.toggleAdminUser);
+// router.get('/dashboard', getDashboardController)
+router.get('/clients', listClientsController)
+router.get('/clients/:id', getClientDetailController)
+router.get('/users', listAdminUsersController)
+router.get('/users/:id', getAdminUserController)
+router.patch('/users/:id/toggle', toggleAdminUserController)
 
-export default router;
+export default router

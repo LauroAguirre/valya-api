@@ -1,12 +1,13 @@
-import { Router } from 'express';
-import { aiConfigController } from '../controllers/aiConfig.controller.js';
-import { authenticate, authorizeRoles } from '../middlewares/auth.js';
+import { Router } from 'express'
+import { authenticate, authorizeRoles } from '../middlewares/auth.js'
+import { getAiConfigsController } from '@/controllers/configs/getAiConfigsController.js'
+import { saveAiConfigsController } from '@/controllers/configs/saveAiConfigsController.js'
 
-const router = Router();
+const router = Router()
 
-router.use(authenticate, authorizeRoles('CLIENT'));
+router.use(authenticate, authorizeRoles('CLIENT'))
 
-router.get('/', aiConfigController.get);
-router.put('/', aiConfigController.update);
+router.get('/', getAiConfigsController)
+router.post('/', saveAiConfigsController)
 
-export default router;
+export default router
