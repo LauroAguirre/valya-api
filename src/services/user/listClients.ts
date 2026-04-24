@@ -25,7 +25,7 @@ export const listClients = async (params: ListClientsProps) => {
   }
 
   const [clients, total] = await Promise.all([
-    prisma.client.findMany({
+    prisma.user.findMany({
       where,
       select: {
         id: true,
@@ -40,7 +40,7 @@ export const listClients = async (params: ListClientsProps) => {
       skip,
       take: limit
     }),
-    prisma.client.count({ where })
+    prisma.user.count({ where })
   ])
 
   return { clients, total, page, limit }

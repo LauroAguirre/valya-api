@@ -2,7 +2,7 @@ import prisma from '@/config/database'
 import { UserRole } from '@prisma/client'
 
 export const getAdminUser = async (userId: string) => {
-  const user = await prisma.client.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id: userId, role: UserRole.ADMIN },
     select: {
       id: true,

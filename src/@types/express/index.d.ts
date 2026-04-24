@@ -1,9 +1,9 @@
-import { JwtPayload } from '@/middleware/auth' // Ajuste o caminho
+import type { User } from '@prisma/client'
 
 declare global {
   namespace Express {
     interface Request {
-      user?: JwtPayload
+      user?: User
     }
   }
 }

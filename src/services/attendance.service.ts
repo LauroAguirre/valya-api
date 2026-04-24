@@ -25,8 +25,8 @@ export const attendanceService = {
       return
     }
 
-    const corretorId = evolutionConfig.user.id
-    const lead = await findOrCreateByPhone(corretorId, leadPhone, pushName)
+    const userId = evolutionConfig.user.id
+    const lead = await findOrCreateByPhone(userId, leadPhone, pushName)
     const sender = fromMe ? 'BROKER' : 'LEAD'
 
     await prisma.message.create({
@@ -47,17 +47,15 @@ export const attendanceService = {
     }
 
     const aiConfig = await prisma.aiConfig.findUnique({
-      where: { clientId: corretorId }
+      where: { userId: userId }
     })
     if (!aiConfig?.isActive) {
-      console.log(
-        `[Attendance] IA global desativada para corretor ${corretorId}`
-      )
+      console.log(`[Attendance] IA global desativada para corretor ${userId}`)
       return { processed: true, aiResponse: false }
     }
 
     try {
-      const { message } = await buildAndRespond(corretorId, lead.id)
+      const { message } = await buildAndRespond(userId, lead.id)
       if (!message) {
         console.error(`[Attendance] Resposta vazia do prompt builder`)
         return { processed: true, aiResponse: false }

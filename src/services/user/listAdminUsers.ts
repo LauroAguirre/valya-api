@@ -2,7 +2,7 @@ import prisma from '@/config/database'
 import { UserRole } from '@prisma/client'
 
 export const listAdminUsers = async () => {
-  return prisma.client.findMany({
+  return prisma.user.findMany({
     where: { role: UserRole.ADMIN },
     select: {
       id: true,

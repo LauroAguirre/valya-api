@@ -1,9 +1,9 @@
 import prisma from '../config/database.js'
 
 export const profileService = {
-  async getProfile(clientId: string) {
-    const user = await prisma.client.findUnique({
-      where: { id: clientId },
+  async getProfile(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
       select: {
         id: true,
         name: true,
@@ -32,7 +32,7 @@ export const profileService = {
       address?: string
     }
   ) {
-    return prisma.client.update({
+    return prisma.user.update({
       where: { id: userId },
       data,
       select: {
@@ -47,9 +47,9 @@ export const profileService = {
     })
   },
 
-  async getSubscriptionStatus(clientId: string) {
+  async getSubscriptionStatus(userId: string) {
     const subscription = await prisma.subscription.findUnique({
-      where: { clientId },
+      where: { agentId: userId },
       include: { payments: { orderBy: { createdAt: 'desc' }, take: 10 } }
     })
     if (!subscription) throw new Error('Assinatura nao encontrada.')
@@ -59,7 +59,7 @@ export const profileService = {
       (subscription.expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
     )
     const asaasCustomer = await prisma.asaasCustomer.findUnique({
-      where: { clientId }
+      where: { userId }
     })
 
     return {

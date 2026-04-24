@@ -1,5 +1,6 @@
 import prisma from '@/config/database'
-import { generateToken, TRIAL_DAYS } from '@/utils/helpers'
+import { generateToken } from '@/utils/helpers'
+// import { generateToken, TRIAL_DAYS } from '@/utils/helpers'
 
 export const oauthLogin = async (
   provider: 'GOOGLE' | 'FACEBOOK',

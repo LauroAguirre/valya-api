@@ -8,7 +8,7 @@ export const getPropertyByIdController = async (
 ) => {
   const { id } = req.params
   try {
-    successResponse(res, await getPropertyById(req.user!.userId, id))
+    successResponse(res, await getPropertyById(req.user!.id, id))
   } catch (error: unknown) {
     errorResponse(
       res,

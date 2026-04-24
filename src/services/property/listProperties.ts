@@ -8,7 +8,12 @@ export const listProperties = async (
   const skip = (page - 1) * limit
   const where = {
     userId,
-    ...(search ? { name: { contains: search } } : {})
+    deletedAt: null,
+    ...(search
+      ? {
+          OR: [{ name: { contains: search } }, { address: { contains: search } }]
+        }
+      : {})
   }
 
   const [properties, total] = await Promise.all([

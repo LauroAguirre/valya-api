@@ -5,6 +5,8 @@ import { errorResponse, successResponse } from '@/utils/helpers'
 export const saveLeadController = async (req: Request, res: Response) => {
   try {
     const { user } = req
+    if (!user) throw new Error('Forbiden!')
+
     const lead = await saveLead(user.id, req.body)
     return successResponse(res, lead, 201)
   } catch (error: unknown) {

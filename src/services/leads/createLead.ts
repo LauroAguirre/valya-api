@@ -1,9 +1,9 @@
 import prisma from '@/config/database'
 import { Lead, LeadOrigin, LeadStage } from '@prisma/client'
 
-export const saveLead = async (clientId: string, data: Lead) => {
+export const saveLead = async (userId: string, data: Lead) => {
   const existing = await prisma.lead.findFirst({
-    where: { clientId, phone: data.phone }
+    where: { userId, phone: data.phone }
   })
   if (existing)
     throw new Error('Lead com esse telefone ja existe para esse corretor.')
@@ -13,11 +13,11 @@ export const saveLead = async (clientId: string, data: Lead) => {
       id: data.id || ''
     },
     create: {
-      clientId,
+      userId,
       name: data.name,
       phone: data.phone,
       email: data.email,
-      origin: data.origin || LeadOrigin.OUTRO,
+      origin: data.origin || LeadOrigin.OTHER,
       stage: data.stage || LeadStage.QUALIFICATION
     },
     update: {

@@ -1,10 +1,10 @@
 import prisma from '@/config/database'
 
-export const listByStage = async (clientId: string) => {
+export const listByStage = async (userId: string) => {
   const leads = await prisma.lead.findMany({
-    where: { clientId },
+    where: { userId },
     include: {
-      leadProperties: {
+      properties: {
         include: { property: { select: { id: true, name: true } } },
         take: 1,
         orderBy: { createdAt: 'desc' }

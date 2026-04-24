@@ -20,8 +20,8 @@ export const buildAndRespond = async (
   const sortedMessages = messages.reverse()
 
   const [aiConfig, broker] = await Promise.all([
-    prisma.aiConfig.findUnique({ where: { clientId: corretorId } }),
-    prisma.client.findUnique({
+    prisma.aiConfig.findUnique({ where: { userId: corretorId } }),
+    prisma.user.findUnique({
       where: { id: corretorId },
       select: { name: true, phone: true }
     })

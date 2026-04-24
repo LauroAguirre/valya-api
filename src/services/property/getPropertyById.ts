@@ -1,12 +1,13 @@
 import prisma from '@/config/database'
 
-export const getPropertyById = async (clientId: string, propertyId: string) => {
+export const getPropertyById = async (userId: string, propertyId: string) => {
   const property = await prisma.property.findFirst({
-    where: { id: propertyId, clientId },
+    where: { id: propertyId, userId },
     include: {
       units: { orderBy: { unitName: 'asc' } },
       images: { orderBy: { order: 'asc' } },
-      adLinks: true
+      adLinks: true,
+      user: true
     }
   })
   if (!property) throw new Error('Imovel nao encontrado.')
