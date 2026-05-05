@@ -1,30 +1,27 @@
 import prisma from '@/config/database'
 
 export const getMessages = async (
-  clientId: string,
+  userId: string,
   leadId: string,
   params: { page?: number; limit?: number }
 ) => {
-  try {
-    const { page = 1, limit = 50 } = params
-    const skip = (page - 1) * limit
-    const lead = await prisma.lead.findFirst({
-      where: { id: leadId, clientId }
-    })
-    if (!lead) throw new Error('Lead nao encontrado.')
+  const { page = 1, limit = 50 } = params
+  const skip = (page - 1) * limit
 
-    const [messages, total] = await Promise.all([
-      prisma.message.findMany({
-        where: { leadId },
-        orderBy: { createdAt: 'asc' },
-        skip,
-        take: limit
-      }),
-      prisma.message.count({ where: { leadId } })
-    ])
+  const lead = await prisma.lead.findFirst({
+    where: { id: leadId, userId }
+  })
+  if (!lead) throw new Error('Lead nao encontrado.')
 
-    return { messages, total, page, limit }
-  } catch (error) {
-    throw new Error(error)
-  }
+  const [messages, total] = await Promise.all([
+    prisma.message.findMany({
+      where: { leadId },
+      orderBy: { createdAt: 'asc' },
+      skip,
+      take: limit
+    }),
+    prisma.message.count({ where: { leadId } })
+  ])
+
+  return { messages, total, page, limit }
 }

@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE `config_evolution` MODIFY `status` ENUM('OPEN', 'CONNECTED', 'CONNECTING', 'CLOSED', 'DISCONNECTED', 'REFUSED') NOT NULL DEFAULT 'CONNECTING';
+
+-- AlterTable
+ALTER TABLE `leads` ADD COLUMN `anotacoes` LONGTEXT NULL,
+    ADD COLUMN `url_avatar` VARCHAR(191) NULL;

@@ -10,7 +10,7 @@ export const savePropertyUnitController = async (
   try {
     return successResponse(
       res,
-      await savePropertyUnit(req.user!.userId, propertyId, req.body),
+      await savePropertyUnit(req.user!.id, propertyId, req.body),
       201
     )
   } catch (error: unknown) {

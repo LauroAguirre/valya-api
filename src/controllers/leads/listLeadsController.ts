@@ -1,11 +1,13 @@
 import { Request, Response } from 'express'
 import { successResponse, errorResponse } from '@/utils/helpers.js'
-import { listByStage } from '@/services/leads/listByStage'
+import { listLeads } from '@/services/leads/listLeads'
 
-export const listByStageController = async (req: Request, res: Response) => {
+export const listLeadsController = async (req: Request, res: Response) => {
   try {
     const { clientId } = req.query
-    const leads = await listByStage(clientId as string)
+    const leads = await listLeads(clientId as string)
+
+    console.log({ leads })
 
     return successResponse(res, leads)
   } catch (error: unknown) {

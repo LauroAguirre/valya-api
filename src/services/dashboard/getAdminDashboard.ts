@@ -49,7 +49,7 @@ export const getAdminDashboard = async () => {
       59
     )
 
-    const count = await prisma.client.count({
+    const count = await prisma.user.count({
       where: {
         role: UserRole.CLIENT,
         createdAt: { gte: monthStart, lte: monthEnd }

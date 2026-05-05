@@ -34,7 +34,19 @@ export const listClients = async (params: ListClientsProps) => {
         phone: true,
         isActive: true,
         createdAt: true,
-        subscription: { select: { status: true, expiresAt: true } }
+        realStateAgent: {
+          include: {
+            subscriptions: {
+              orderBy: {
+                expiresAt: 'desc'
+              },
+              select: {
+                status: true,
+                expiresAt: true
+              }
+            }
+          }
+        }
       },
       orderBy: { createdAt: 'desc' },
       skip,

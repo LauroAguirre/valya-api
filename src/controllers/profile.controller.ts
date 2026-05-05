@@ -5,7 +5,7 @@ import { successResponse, errorResponse } from '../utils/helpers.js'
 export const profileController = {
   async getProfile(req: Request, res: Response) {
     try {
-      const result = await profileService.getProfile(req.user!.userId)
+      const result = await profileService.getProfile(req.user!.id)
       successResponse(res, result)
     } catch (error: unknown) {
       const message =
@@ -17,7 +17,7 @@ export const profileController = {
   async updateProfile(req: Request, res: Response) {
     try {
       const { name, phone, personalPhone, address } = req.body
-      const result = await profileService.updateProfile(req.user!.userId, {
+      const result = await profileService.updateProfile(req.user!.id, {
         name,
         phone,
         personalPhone,
@@ -33,9 +33,7 @@ export const profileController = {
 
   async getSubscriptionStatus(req: Request, res: Response) {
     try {
-      const result = await profileService.getSubscriptionStatus(
-        req.user!.userId
-      )
+      const result = await profileService.getSubscriptionStatus(req.user!.id)
       successResponse(res, result)
     } catch (error: unknown) {
       const message =

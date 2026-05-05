@@ -3,11 +3,11 @@ import { AsaasApi } from '@/providers/asaasApi'
 import { SubscriptionStatus } from '@prisma/client'
 
 export const createSubscription = async (
-  clientId: string,
+  userId: string,
   params: { value: number; dueDate: string; description?: string }
 ) => {
   const asaasCustomer = await prisma.asaasCustomer.findUnique({
-    where: { clientId }
+    where: { userId }
   })
   if (!asaasCustomer)
     throw new Error('Cliente nao cadastrado na Asaas. Cadastre primeiro.')
@@ -22,7 +22,7 @@ export const createSubscription = async (
       nextDueDate: params.dueDate,
       cycle: 'MONTHLY',
       description: params.description || 'Assinatura Valya - Plano Mensal',
-      externalReference: clientId
+      externalReference: userId
     })
     .then(result => {
       return result.data
@@ -53,7 +53,7 @@ export const createSubscription = async (
   // const subscription = await res.json();
 
   await prisma.subscription.update({
-    where: { clientId },
+    where: { agentId: userId },
     data: { asaasSubId: newSubscription.id, status: SubscriptionStatus.ACTIVE }
   })
   return newSubscription

@@ -2,15 +2,22 @@ import { Router } from 'express'
 import { authenticate, authorizeRoles } from '../middlewares/auth.js'
 import { getAdminDashboardController } from '@/controllers/dashboard/getDashboardController.js'
 import { UserRole } from '@prisma/client'
-import { getClientDashboardController } from '@/controllers/dashboard/getClientDashboardController.js'
+import { getClientDashboardKpisController } from '@/controllers/dashboard/getClientDashboardKpisController.js'
+import { getLeadsMonthlyChartController } from '@/controllers/dashboard/getLeadsMonthlyChartController.js'
 
 const router = Router()
 
 router.get(
-  '/client',
+  '/client/:userId/kpis',
   authenticate,
   authorizeRoles(UserRole.CLIENT),
-  getClientDashboardController
+  getClientDashboardKpisController
+)
+router.get(
+  '/client/:userId/leadsChart',
+  authenticate,
+  authorizeRoles(UserRole.CLIENT),
+  getLeadsMonthlyChartController
 )
 router.get(
   '/admin',

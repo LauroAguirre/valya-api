@@ -8,7 +8,7 @@ export const listPropertiesController = async (req: Request, res: Response) => {
 
     const { user } = req
 
-    const result = await listProperties(user.id, {
+    const result = await listProperties(user!.id, {
       page: page ? parseInt(page as string, 10) : 1,
       limit: limit ? parseInt(limit as string, 10) : 20,
       search: search as string

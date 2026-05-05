@@ -9,13 +9,24 @@ export const profileService = {
         name: true,
         email: true,
         phone: true,
-        personalPhone: true,
         address: true,
         avatarUrl: true,
         role: true,
         createdAt: true,
-        subscription: {
-          select: { id: true, status: true, startDate: true, expiresAt: true }
+        realStateAgent: {
+          include: {
+            subscriptions: {
+              orderBy: {
+                expiresAt: 'desc'
+              },
+              select: {
+                id: true,
+                status: true,
+                startDate: true,
+                expiresAt: true
+              }
+            }
+          }
         }
       }
     })
@@ -40,7 +51,6 @@ export const profileService = {
         name: true,
         email: true,
         phone: true,
-        personalPhone: true,
         address: true,
         avatarUrl: true
       }

@@ -1,49 +1,76 @@
 import prisma from '@/config/database'
 import { LeadStage } from '@prisma/client'
-import { endOfMonth, startOfMonth } from 'date-fns'
+import { endOfMonth, startOfMonth, subMonths } from 'date-fns'
 
-export const getClientDashboard = async (clientId: string) => {
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+const ACTIVE_STAGES = Object.values(LeadStage).filter(
+  s => s !== LeadStage.WIN && s !== LeadStage.LOSS
+) as LeadStage[]
 
-  const activeLeads = await prisma.lead.count({
-    where: {
-      clientId,
-      stage: { notIn: [LeadStage.WIN, LeadStage.LOSS] },
-      lastReplyAt: { gte: sevenDaysAgo }
-    }
-  })
+export const getClientDashboard = async (userId: string) => {
+  const now = new Date()
+  const thisMonthStart = startOfMonth(now)
+  const thisMonthEnd = endOfMonth(now)
+  const lastMonthStart = startOfMonth(subMonths(now, 1))
+  const lastMonthEnd = endOfMonth(subMonths(now, 1))
 
-  const followUpLeads = await prisma.lead.count({
-    where: { clientId, stage: LeadStage.CADENCE }
-  })
-
-  const monthlyData = []
-  for (let i = 5; i >= 0; i--) {
-    const monthStart = startOfMonth(new Date()) // new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const monthEnd = endOfMonth(new Date()) // new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
-
-    const [newLeads, closedDeals] = await Promise.all([
-      prisma.lead.count({
-        where: { clientId, createdAt: { gte: monthStart, lte: monthEnd } }
-      }),
-      prisma.lead.count({
-        where: {
-          clientId,
-          stage: LeadStage.WIN,
-          updatedAt: { gte: monthStart, lte: monthEnd }
-        }
-      })
-    ])
-
-    monthlyData.push({
-      month: monthStart.toLocaleString('pt-BR', {
-        month: 'short',
-        year: '2-digit'
-      }),
-      newLeads,
-      closedDeals
+  const [
+    newLeads,
+    lastMonthNewLeads,
+    followUpLeads,
+    activeNegotiationsThisMonth,
+    activeNegotiationsLastMonth
+  ] = await Promise.all([
+    prisma.lead.count({
+      where: { userId, createdAt: { gte: thisMonthStart, lte: thisMonthEnd } }
+    }),
+    prisma.lead.count({
+      where: { userId, createdAt: { gte: lastMonthStart, lte: lastMonthEnd } }
+    }),
+    prisma.lead.count({
+      where: { userId, stage: LeadStage.CADENCE }
+    }),
+    prisma.leadStageHistory.findMany({
+      where: {
+        lead: { userId },
+        toStage: { in: ACTIVE_STAGES },
+        changedAt: { gte: thisMonthStart, lte: thisMonthEnd }
+      },
+      distinct: ['leadId'],
+      select: { leadId: true }
+    }),
+    prisma.leadStageHistory.findMany({
+      where: {
+        lead: { userId },
+        toStage: { in: ACTIVE_STAGES },
+        changedAt: { gte: lastMonthStart, lte: lastMonthEnd }
+      },
+      distinct: ['leadId'],
+      select: { leadId: true }
     })
-  }
+  ])
 
-  return { activeLeads, followUpLeads, monthlyData }
+  return {
+    kpis: [
+      {
+        label: 'Novos Leads',
+        value: newLeads,
+        change: newLeads - lastMonthNewLeads,
+        changeLabel: 'vs mês anterior'
+      },
+      {
+        label: 'Negociações Ativas',
+        value: activeNegotiationsThisMonth.length,
+        change:
+          activeNegotiationsThisMonth.length -
+          activeNegotiationsLastMonth.length,
+        changeLabel: 'vs mês anterior'
+      },
+      {
+        label: 'Cadência / Follow-up',
+        value: followUpLeads,
+        change: null,
+        changeLabel: null
+      }
+    ]
+  }
 }

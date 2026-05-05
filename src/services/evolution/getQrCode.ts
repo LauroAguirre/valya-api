@@ -21,6 +21,7 @@ interface ConnectInstanceResponse {
 }
 
 export const getQrCode = async (userId: string) => {
+  console.log({ userId })
   const config = await prisma.evolutionConfig.findUnique({
     where: { userId }
   })

@@ -22,7 +22,7 @@ export const extractPriceTableController = async (
       res,
       await extractAndUpdate({
         filePath: file.path,
-        clientId: req.user!.userId,
+        clientId: req.user!.id,
         propertyId
       })
     )

@@ -8,7 +8,7 @@ export function successResponse(
   data: unknown,
   statusCode = 200
 ) {
-  return res.status(statusCode).send(data)
+  return res.status(statusCode).json(data)
   // return res.status(statusCode).json({
   //   success: true,
   //   data
@@ -68,6 +68,10 @@ export function calculateTypingDelay(message: string): number {
 
 export function normalizePhone(phone: string): string {
   return phone.replace(/\D/g, '')
+}
+
+export function normalizeJid(jid: string): string {
+  return normalizePhone(jid.replace('@s.whatsapp.net', ''))
 }
 
 export const SALT_ROUNDS = 12

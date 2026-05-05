@@ -12,10 +12,14 @@ export const login = async (email: string, password: string, ip: string) => {
         id: true,
         name: true,
         email: true,
-        password: true,
         role: true,
+        phone: true,
+        address: true,
+        avatarUrl: true,
+        createdAt: true,
         isActive: true,
         provider: true,
+        password: true,
         realStateAgent: {
           include: {
             subscriptions: {
@@ -23,6 +27,23 @@ export const login = async (email: string, password: string, ip: string) => {
                 plan: {
                   include: {
                     features: true
+                  }
+                }
+              }
+            }
+          }
+        },
+        companyUsers: {
+          include: {
+            constructionCompany: {
+              include: {
+                subscription: {
+                  include: {
+                    plan: {
+                      include: {
+                        features: true
+                      }
+                    }
                   }
                 }
               }
@@ -71,13 +92,11 @@ export const login = async (email: string, password: string, ip: string) => {
 
     await generateRefreshToken(user.id, token, ip)
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _, ...userWithoutPassword } = user
+
     return {
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      },
+      user: userWithoutPassword,
       plan: currentPlan,
       planExpirationDate: expirationDate,
       token

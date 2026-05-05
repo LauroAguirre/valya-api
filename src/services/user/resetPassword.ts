@@ -7,12 +7,12 @@ export const resetPassword = async (
   code: string,
   newPassword: string
 ) => {
-  const client = await prisma.client.findUnique({ where: { email } })
-  if (!client) throw new Error('Codigo invalido.')
+  const user = await prisma.user.findUnique({ where: { email } })
+  if (!user) throw new Error('Codigo invalido.')
 
   const resetRecord = await prisma.passwordReset.findFirst({
     where: {
-      clientId: client.id,
+      userId: user.id,
       code,
       used: false,
       expiresAt: { gte: new Date() }
@@ -25,8 +25,8 @@ export const resetPassword = async (
   const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS)
 
   await prisma.$transaction([
-    prisma.client.update({
-      where: { id: client.id },
+    prisma.user.update({
+      where: { id: user.id },
       data: { password: hashedPassword }
     }),
     prisma.passwordReset.update({
@@ -36,16 +36,16 @@ export const resetPassword = async (
   ])
 
   const token = generateToken({
-    userId: client.id,
-    email: client.email,
-    role: client.role
+    userId: user.id,
+    email: user.email,
+    role: user.role
   })
   return {
     user: {
-      id: client.id,
-      name: client.name,
-      email: client.email,
-      role: client.role
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role
     },
     token
   }

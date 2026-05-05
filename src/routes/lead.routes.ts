@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { authenticate, authorizeRoles } from '../middlewares/auth.js'
-import { listByStageController } from '@/controllers/leads/listByStageController.js'
+import { listLeadsController } from '@/controllers/leads/listLeadsController.js'
 import { getByIdController } from '@/controllers/leads/getByIdController.js'
 import { getMessagesController } from '@/controllers/leads/getMessagesController.js'
 import { saveLeadController } from '@/controllers/leads/saveLeadController.js'
@@ -10,7 +10,7 @@ const router = Router()
 
 router.use(authenticate, authorizeRoles('CLIENT'))
 
-router.get('/', listByStageController)
+router.get('/', listLeadsController)
 router.get('/:id', getByIdController)
 router.get('/:id/messages', getMessagesController)
 router.post('/', saveLeadController)

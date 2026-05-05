@@ -7,10 +7,11 @@ export const getConnectionStatusController = async (
   res: Response
 ) => {
   try {
-    const { clientId } = req.query
-    const connection = await getConnectionStatus(clientId as string)
-
-    successResponse(res, connection)
+    const userId = req.user!.id
+    console.log('getConnectionStatusController....')
+    const config = await getConnectionStatus(userId)
+    console.log({ config })
+    successResponse(res, config)
   } catch (error: unknown) {
     errorResponse(
       res,

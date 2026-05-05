@@ -6,7 +6,7 @@ export const deletePropertyController = async (req: Request, res: Response) => {
   const { propertyId } = req.params
 
   try {
-    successResponse(res, await deleteProperty(req.user!.userId, propertyId))
+    successResponse(res, await deleteProperty(req.user!.id, propertyId))
   } catch (error: unknown) {
     errorResponse(
       res,

@@ -11,26 +11,39 @@ export const handlePaymentWebhook = async (
     return
   }
 
-  const user = await prisma.client.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id: externalReference },
-    include: { subscription: true }
+    include: {
+      realStateAgent: {
+        include: {
+          subscriptions: {
+            orderBy: {
+              expiresAt: 'desc'
+            },
+            take: 1
+          }
+        }
+      }
+    }
   })
-  if (!user || !user.subscription) {
+  if (!user || !user.realStateAgent || !user.realStateAgent.subscriptions) {
     console.warn(`[Asaas Webhook] Usuario nao encontrado: ${externalReference}`)
     return
   }
+
+  const subscription = user.realStateAgent.subscriptions[0]
 
   switch (event) {
     case 'PAYMENT_CONFIRMED':
     case 'PAYMENT_RECEIVED': {
       const amount = payment.value as number
       const paidAt = new Date()
-      const nextDueDate = new Date(user.subscription.expiresAt)
+      const nextDueDate = new Date(subscription.expiresAt)
       nextDueDate.setMonth(nextDueDate.getMonth() + 1)
 
       await prisma.payment.create({
         data: {
-          subscriptionId: user.subscription.id,
+          subscriptionId: subscription.id,
           asaasPaymentId: payment.id as string,
           amount,
           status: 'CONFIRMED',
@@ -40,7 +53,7 @@ export const handlePaymentWebhook = async (
       })
 
       await prisma.subscription.update({
-        where: { id: user.subscription.id },
+        where: { id: subscription.id },
         data: { status: 'ACTIVE', expiresAt: nextDueDate }
       })
       await emailService.sendPaymentConfirmed(
@@ -56,7 +69,7 @@ export const handlePaymentWebhook = async (
     case 'PAYMENT_OVERDUE': {
       await prisma.payment.create({
         data: {
-          subscriptionId: user.subscription.id,
+          subscriptionId: subscription.id,
           asaasPaymentId: payment.id as string,
           amount: payment.value as number,
           status: 'OVERDUE',

@@ -1,12 +1,12 @@
 import prisma from '@/config/database'
 
 export const savePropertyImage = async (
-  clientId: string,
+  userId: string,
   propertyId: string,
   images: { url: string; description?: string }[]
 ) => {
   const property = await prisma.property.findFirst({
-    where: { id: propertyId, clientId }
+    where: { id: propertyId, userId }
   })
   if (!property) throw new Error('Imovel nao encontrado.')
   const maxOrder = await prisma.propertyImage.findFirst({

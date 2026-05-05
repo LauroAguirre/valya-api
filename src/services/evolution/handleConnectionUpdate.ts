@@ -1,27 +1,40 @@
-import { Prisma } from '@prisma/client'
+import { BaileysStatus, Prisma } from '@prisma/client'
 import prisma from '@/config/database'
+import { emitToUser } from '@/config/socket'
+
+function toStatus(state: string): BaileysStatus {
+  const map: Record<string, BaileysStatus> = {
+    open: BaileysStatus.OPEN,
+    connected: BaileysStatus.CONNECTED,
+    connecting: BaileysStatus.CONNECTING,
+    close: BaileysStatus.CLOSED,
+    closed: BaileysStatus.CLOSED,
+    disconnected: BaileysStatus.DISCONNECTED,
+    refused: BaileysStatus.REFUSED
+  }
+  return map[state.toLowerCase()] ?? BaileysStatus.DISCONNECTED
+}
 
 export const handleConnectionUpdate = async (
   instanceName: string,
   state: string
 ) => {
-  // Ignore transitional states like 'connecting' — only persist terminal states
-  if (state !== 'open' && state !== 'close') return
-
-  const connected = state === 'open'
+  const status = toStatus(state)
+  const connected =
+    status === BaileysStatus.OPEN || status === BaileysStatus.CONNECTED
 
   try {
-    await prisma.evolutionConfig.update({
+    const config = await prisma.evolutionConfig.update({
       where: { instanceName },
-      data: { connected }
+      data: { connected, status }
     })
-    return { instanceName, connected }
+    emitToUser(config.userId, 'connection_update', { status, connected })
+    return { instanceName, connected, status }
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2025'
     ) {
-      // Record not found — instance was deleted; nothing to update
       return
     }
     console.error('[handleConnectionUpdate] Unexpected database error:', error)

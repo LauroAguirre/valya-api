@@ -1,8 +1,8 @@
 import prisma from '@/config/database'
 
-export const deleteProperty = async (clientId: string, propertyId: string) => {
+export const deleteProperty = async (userId: string, propertyId: string) => {
   const existing = await prisma.property.findFirst({
-    where: { id: propertyId, clientId }
+    where: { id: propertyId, userId }
   })
   if (!existing) throw new Error('Imovel nao encontrado.')
   await prisma.property.update({

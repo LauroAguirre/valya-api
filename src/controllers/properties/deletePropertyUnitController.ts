@@ -8,7 +8,7 @@ export const deletePropertyUnitController = async (
 ) => {
   try {
     const { propertyId, unitId } = req.params
-    successResponse(res, await deleteUnit(req.user!.userId, propertyId, unitId))
+    successResponse(res, await deleteUnit(req.user!.id, propertyId, unitId))
   } catch (error: unknown) {
     errorResponse(
       res,

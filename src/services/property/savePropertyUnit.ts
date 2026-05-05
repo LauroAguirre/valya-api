@@ -2,12 +2,12 @@ import prisma from '@/config/database'
 import { PropertyUnit } from '@prisma/client'
 
 export const savePropertyUnit = async (
-  clientId: string,
+  userId: string,
   propertyId: string,
   data: PropertyUnit
 ) => {
   const property = await prisma.property.findFirst({
-    where: { id: propertyId, clientId }
+    where: { id: propertyId, userId }
   })
   if (!property) throw new Error('Imovel nao encontrado.')
   return prisma.propertyUnit.upsert({

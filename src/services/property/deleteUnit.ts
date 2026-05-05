@@ -1,12 +1,12 @@
 import prisma from '@/config/database'
 
 export const deleteUnit = async (
-  clientId: string,
+  userId: string,
   propertyId: string,
   unitId: string
 ) => {
   const property = await prisma.property.findUnique({
-    where: { id: propertyId, clientId },
+    where: { id: propertyId, userId },
     include: {
       units: {
         where: {

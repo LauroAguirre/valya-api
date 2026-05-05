@@ -8,11 +8,11 @@ export const userProfileController = async (req: Request, res: Response) => {
   try {
     const { user } = req
 
-    console.log({ user })
+    if (!user) return res.status(401).send('Unauthorized')
 
     const userProfile = await loadUser(user.id)
 
-    const currentPlan = user.realStateAgent?.subscriptions.find(
+    const currentPlan = user.realStateAgent?.subscriptions?.find(
       (sub: Subscription) => {
         return (
           !sub.expiresAt ||
@@ -23,7 +23,7 @@ export const userProfileController = async (req: Request, res: Response) => {
     )
 
     const expirationDate = user.realStateAgent
-      ? user.realStateAgent?.subscriptions.sort(
+      ? user.realStateAgent?.subscriptions?.sort(
           (a: Subscription, b: Subscription) => {
             if (!a.expiresAt) return -1
             if (!b.expiresAt) return 1

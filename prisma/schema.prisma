@@ -9,6 +9,15 @@ datasource db {
 
 // ==================== ENUMS ====================
 
+enum BaileysStatus {
+  OPEN
+  CONNECTED
+  CONNECTING
+  CLOSED
+  DISCONNECTED
+  REFUSED
+}
+
 enum UserRole {
   CLIENT
   ADMIN
@@ -25,6 +34,14 @@ enum SubscriptionStatus {
   ACTIVE
   EXPIRED
   CANCELLED
+}
+
+enum MessageStatus {
+  PENDING
+  SENT
+  DELIVERED
+  READ
+  FAILED
 }
 
 enum PaymentStatus {
@@ -154,15 +171,16 @@ model ConstructionCompanyUsers {
 }
 
 model EvolutionConfig {
-  id           String   @id @default(uuid()) @map("id_config_evolution")
-  userId       String   @unique @map("id_usuario")
-  instanceName String   @unique @map("nome_instancia")
-  instanceId   String?  @map("id_instancia")
-  qrCode       String?  @map("qr_code") @db.LongText
-  connected    Boolean  @default(false) @map("conectado")
-  phone        String?  @map("telefone")
-  createdAt    DateTime @default(now()) @map("dt_criacao")
-  updatedAt    DateTime @updatedAt @map("dt_atualizacao")
+  id           String        @id @default(uuid()) @map("id_config_evolution")
+  userId       String        @unique @map("id_usuario")
+  instanceName String        @unique @map("nome_instancia")
+  instanceId   String?       @map("id_instancia")
+  qrCode       String?       @map("qr_code") @db.LongText
+  status       BaileysStatus @default(CONNECTING) @map("status")
+  connected    Boolean       @default(false) @map("conectado")
+  phone        String?       @map("telefone")
+  createdAt    DateTime      @default(now()) @map("dt_criacao")
+  updatedAt    DateTime      @updatedAt @map("dt_atualizacao")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -188,16 +206,37 @@ model Lead {
   origin      LeadOrigin @default(WHATSAPP) @map("origem")
   stage       LeadStage  @default(QUALIFICATION) @map("etapa")
   aiEnabled   Boolean    @default(true) @map("ia_ativa")
+  avatarUrl   String?    @map("url_avatar")
+  tags        String?    @map("tags") @db.Text
+  notes       String?    @map("anotacoes") @db.LongText
   lastReplyAt DateTime?  @map("dt_ultima_resposta")
   createdAt   DateTime   @default(now()) @map("dt_cadastro")
   updatedAt   DateTime   @updatedAt @map("dt_atualizacao")
 
-  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  messages   Message[]
-  properties LeadProperty[]
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages     Message[]
+  properties   LeadProperty[]
+  stageHistory LeadStageHistory[]
 
   @@unique([userId, phone])
   @@map("leads")
+}
+
+model LeadStageHistory {
+  id          String     @id @default(uuid()) @map("id_historico_etapa")
+  leadId      String     @map("id_lead")
+  fromStage   LeadStage? @map("etapa_anterior")
+  toStage     LeadStage  @map("etapa_atual")
+  changedAt   DateTime   @default(now()) @map("dt_alteracao")
+  userId      String?    @map("id_usuario")
+  changedByAi Boolean    @default(false) @map("alterado_por_ia")
+  obs         String?    @map("observacao") @db.Text
+
+  lead Lead  @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([leadId, changedAt])
+  @@map("leads_historico_etapas")
 }
 
 model LeadProperty {
@@ -215,13 +254,16 @@ model LeadProperty {
 }
 
 model Message {
-  id        String          @id @default(uuid()) @map("id_mensagem")
-  leadId    String          @map("id_lead")
-  sender    MessageSender   @map("remetente")
-  content   String          @map("conteudo") @db.LongText
-  mediaUrl  String?         @map("url_midia")
-  intent    IntentCategory? @map("intent")
-  createdAt DateTime        @default(now())
+  id                 String          @id @default(uuid()) @map("id_mensagem")
+  leadId             String          @map("id_lead")
+  evolutionMessageId String?         @unique @map("id_mensagem_evolution")
+  sender             MessageSender   @map("remetente")
+  content            String          @map("conteudo") @db.LongText
+  status             MessageStatus?  @map("status")
+  mediaUrl           String?         @map("url_midia")
+  intent             IntentCategory? @map("intent")
+  deletedAt          DateTime?       @map("dt_exclusao")
+  createdAt          DateTime        @default(now()) @map("dt_cadastro")
 
   lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
@@ -368,8 +410,11 @@ model RealStateAgent {
   userId         String  @unique @map("id_usuario")
   creci          String  @unique @map("creci")
   comercialPhone String? @map("telefone_comercial")
+  whatsApp       String? @map("whatsapp")
   cnpj           String? @unique @map("cnpj")
   site           String? @map("site")
+  city           String? @map("cidade")
+  uf             String? @map("uf") @db.Char(2)
 
   user User @relation(fields: [userId], references: [id], onDelete: NoAction)
 
@@ -440,7 +485,7 @@ model SystemConfig {
 model User {
   id         String       @id @default(uuid()) @map("id_usuario")
   name       String       @map("nome")
-  email      String       @unique
+  email      String       @unique @map("email")
   password   String?      @map("senha")
   cpf        String?      @unique @map("cpf")
   role       UserRole     @default(CLIENT) @map("perfil")
@@ -464,6 +509,7 @@ model User {
   refreshKeys    RefreshKeys[]
   realStateAgent RealStateAgent?
   companyUsers   ConstructionCompanyUsers[]
+  stageChanges   LeadStageHistory[]
 
   @@map("usuarios")
 }

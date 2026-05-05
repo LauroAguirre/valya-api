@@ -3,8 +3,11 @@ import { errorResponse, successResponse } from '@/utils/helpers'
 import { getQrCode } from '@/services/evolution/getQrCode'
 
 export const getQrCodeController = async (req: Request, res: Response) => {
-  const { userId } = req.query
-  const qrCode = await getQrCode(userId as string)
+  // const { userId } = req.query
+  const { user } = req
+  console.log('getQrCodeController....')
+  const qrCode = await getQrCode(user!.id)
+  console.log({ qrCode })
   try {
     return successResponse(res, qrCode, 201)
   } catch (error: unknown) {

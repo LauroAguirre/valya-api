@@ -4,15 +4,7 @@ export const loadUser = async (userId: string) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        phone: true,
-        address: true,
-        avatarUrl: true,
-        createdAt: true,
+      include: {
         realStateAgent: {
           include: {
             subscriptions: {
@@ -46,7 +38,11 @@ export const loadUser = async (userId: string) => {
       }
     })
     if (!user) throw new Error('Usuario nao encontrado.')
-    return user
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _, ...userWithoutPassword } = user
+
+    return userWithoutPassword
   } catch (error) {
     if (error instanceof Error) {
       throw error

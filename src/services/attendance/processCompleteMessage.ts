@@ -3,6 +3,8 @@ import { normalizePhone } from '@/utils/helpers'
 import { LeadOrigin, LeadStage, MessageSender } from '@prisma/client'
 import { sendMessage } from '../evolution/sendMessage'
 import { runSdrAgent } from '../openAi/sdrAgent'
+import { emitToUser } from '@/config/socket'
+import { createStageHistory } from '../leads/createStageHistory'
 
 // Matches http/https URLs; trailing punctuation is stripped after match
 const URL_REGEX = /https?:\/\/[^\s]+/g
@@ -73,12 +75,14 @@ export const processCompleteMessage = async (
         aiEnabled: true
       }
     })
+    await createStageHistory({ leadId: lead.id, fromStage: null, toStage: lead.stage, changedByAi: true })
   }
 
   // ── 3. Persist the incoming message ───────────────────────────────────────
-  await prisma.message.create({
+  const savedMessage = await prisma.message.create({
     data: { leadId: lead.id, sender: MessageSender.LEAD, content: fullMessage }
   })
+  emitToUser(brokerId, 'new_message', savedMessage)
 
   await prisma.lead.update({
     where: { id: lead.id },
@@ -205,13 +209,14 @@ export const processCompleteMessage = async (
     }
 
     if (result.message) {
-      await prisma.message.create({
+      const aiSavedMessage = await prisma.message.create({
         data: {
           leadId: lead.id,
           sender: MessageSender.AI,
           content: result.message
         }
       })
+      emitToUser(brokerId, 'new_message', aiSavedMessage)
 
       await sendMessage({ instanceName, to: leadPhone, message: result.message })
 

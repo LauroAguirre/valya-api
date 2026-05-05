@@ -2,7 +2,7 @@ import prisma from '@/config/database'
 import { AsaasApi } from '@/providers/asaasApi'
 
 export const createCustomer = async (
-  clientId: string,
+  userId: string,
   data: {
     cpfCnpj: string
     name: string
@@ -14,7 +14,7 @@ export const createCustomer = async (
   }
 ) => {
   const existing = await prisma.asaasCustomer.findUnique({
-    where: { clientId }
+    where: { userId }
   })
   if (existing) throw new Error('Cliente ja cadastrado na Asaas.')
 
@@ -28,7 +28,7 @@ export const createCustomer = async (
     postalCode: data.postalCode,
     address: data.address,
     addressNumber: data.addressNumber,
-    externalReference: clientId
+    externalReference: userId
   })
 
   if (![200, 201].includes(res.status)) {
@@ -40,7 +40,7 @@ export const createCustomer = async (
 
   return prisma.asaasCustomer.create({
     data: {
-      clientId,
+      userId,
       asaasCustomerId: customer.id,
       cpfCnpj: data.cpfCnpj,
       name: data.name,

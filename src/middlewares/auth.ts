@@ -38,7 +38,16 @@ export async function authenticate(
         ip
       },
       include: {
-        user: true
+        user: {
+          include: {
+            realStateAgent: {
+              include: {
+                subscriptions: true
+              }
+            },
+            companyUsers: true
+          }
+        }
       },
       orderBy: {
         authExpires: 'desc'
@@ -58,6 +67,11 @@ export async function authenticate(
     }
 
     req.user = userTk?.user
+      ? {
+          ...userTk.user,
+          realStateAgent: userTk.user.realStateAgent ?? undefined
+        }
+      : undefined
 
     next()
   } catch {

@@ -6,7 +6,7 @@ export const deleteImageController = async (req: Request, res: Response) => {
   try {
     successResponse(
       res,
-      await deletePropertyimage(req.user!.userId, req.params.imageId)
+      await deletePropertyimage(req.user!.id, req.params.imageId)
     )
   } catch (error: unknown) {
     errorResponse(

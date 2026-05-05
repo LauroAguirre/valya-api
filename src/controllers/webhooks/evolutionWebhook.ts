@@ -1,11 +1,13 @@
 import { processIncomingMessage } from '@/services/attendance/processIncomingMessage'
-import { handleConnectionUpdate } from '@/services/evolution/handleConnectionUpdate'
 import { Request, Response } from 'express'
 
 export const evolutionWebhook = async (req: Request, res: Response) => {
   try {
     const body = req.body
     const event = body.event
+
+    console.log({ event })
+    console.log({ body })
 
     if (event === 'messages.upsert') {
       const messageData = body.data
@@ -31,6 +33,7 @@ export const evolutionWebhook = async (req: Request, res: Response) => {
           await processIncomingMessage({
             instanceName,
             remoteJid: messageData.key.remoteJid,
+            evolutionMessageId: messageData.key.id,
             fromMe: messageData.key.fromMe || false,
             message: messageContent,
             pushName: messageData.pushName
@@ -42,13 +45,6 @@ export const evolutionWebhook = async (req: Request, res: Response) => {
           )
         }
       })
-    }
-
-    if (event === 'connection.update') {
-      const instanceName = body.instance || body.instanceName
-      const state = body.data?.state
-      if (instanceName && state)
-        await handleConnectionUpdate(instanceName, state)
     }
 
     res.status(200).json({ received: true })

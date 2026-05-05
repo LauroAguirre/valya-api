@@ -1,8 +1,10 @@
+import http from 'http'
 import express from 'express'
 import cors from 'cors'
 import path from 'path'
 import fs from 'fs'
 import { env } from './config/env'
+import { initSocket } from './config/socket'
 
 // Routes
 import userRoutes from './routes/user.routes'
@@ -15,6 +17,8 @@ import evolutionRoutes from './routes/evolution.routes'
 import backofficeRoutes from './routes/backoffice.routes'
 import webhookRoutes from './routes/webhook.routes'
 import pdfRoutes from './routes/pdf.routes'
+import companyRoutes from './routes/company.routes'
+import agentsRoutes from './routes/agents.routes'
 import { Request, Response, NextFunction } from 'express'
 
 const app = express()
@@ -50,6 +54,8 @@ app.use('/api/evolution', evolutionRoutes)
 app.use('/api/backoffice', backofficeRoutes)
 app.use('/api/webhooks', webhookRoutes)
 app.use('/api/pdf', pdfRoutes)
+app.use('/api/company', companyRoutes)
+app.use('/api/agents', agentsRoutes)
 
 // Health check
 app.get('/api/health', (_req, res) => {
@@ -58,6 +64,7 @@ app.get('/api/health', (_req, res) => {
 
 // Error handler global
 app.use((err: Error, _req: Request, res: Response) => {
+  console.log({ err })
   console.error('[API Error]', err.message)
   // console.error('[API Error]', err)
   res.status(500).json({
@@ -67,7 +74,10 @@ app.use((err: Error, _req: Request, res: Response) => {
   })
 })
 
-app.listen(env.PORT, () => {
+const httpServer = http.createServer(app)
+initSocket(httpServer)
+
+httpServer.listen(env.PORT, () => {
   console.log(`[Valya API] Servidor rodando na porta ${env.PORT}`)
 })
 

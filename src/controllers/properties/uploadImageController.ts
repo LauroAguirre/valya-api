@@ -15,7 +15,7 @@ export const uploadImageController = async (req: Request, res: Response) => {
     }))
     successResponse(
       res,
-      await savePropertyImage(req.user!.userId, req.params.id, images),
+      await savePropertyImage(req.user!.id, req.params.id, images),
       201
     )
   } catch (error) {

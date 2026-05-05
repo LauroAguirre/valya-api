@@ -12,7 +12,8 @@
     "prisma:push": "prisma db push",
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
-    "format": "prettier --write \"src/**/*.{ts,json,prisma}\""
+    "format": "prettier --write \"src/**/*.{ts,json,prisma}\"",
+    "copyviews": "copyfiles -u 2 src/views/* dist/views && copyfiles -u 2 src/views/img/* dist/views/ && copyfiles -u 2 src/views/fonts/* dist/views/ "
   },
   "dependencies": {
     "@eslint/eslintrc": "^3.3.5",
@@ -30,6 +31,7 @@
     "nodemailer": "^8.0.2",
     "openai": "^4.77.0",
     "request-ip": "^3.3.0",
+    "socket.io": "^4.8.3",
     "uuid": "^11.0.5",
     "zod": "^3.24.1"
   },
@@ -45,7 +47,6 @@
     "@types/node": "^22.10.5",
     "@types/nodemailer": "^6.4.23",
     "@types/request-ip": "^0.0.41",
-    "@types/uuid": "^11.0.0",
     "eslint": "^10.0.3",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.4.0",

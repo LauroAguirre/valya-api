@@ -2,12 +2,12 @@ import prisma from '@/config/database'
 import { PropertyUnit } from '@prisma/client'
 
 export const savePropertyUnities = async (
-  clientId: string,
+  userId: string,
   propertyId: string,
   unities: PropertyUnit[]
 ) => {
   const property = await prisma.property.findUnique({
-    where: { id: propertyId, clientId }
+    where: { id: propertyId, userId }
   })
   if (!property) throw new Error('Propriedade nao encontrada.')
 

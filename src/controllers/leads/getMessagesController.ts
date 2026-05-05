@@ -4,10 +4,11 @@ import { errorResponse, paginatedResponse } from '@/utils/helpers'
 
 export const getMessagesController = async (req: Request, res: Response) => {
   try {
-    const { page, limit, clientId } = req.query
+    const { page, limit } = req.query
+    const { user } = req
     const { leadId } = req.params
 
-    const result = await getMessages(clientId as string, leadId as string, {
+    const result = await getMessages(user?.id as string, leadId as string, {
       page: page ? parseInt(page as string, 10) : 1,
       limit: limit ? parseInt(limit as string, 10) : 50
     })
